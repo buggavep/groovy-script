@@ -1,0 +1,29 @@
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
+ def mvnHome
+ stage name: "checkout source code"  
+ node {       
+    git credentialsId: 'auth_github', url: 'https://github.com/sysadmi/JenkinsAssignment.git'
+    mvnHome = tool 'M3'
+    //def readPom = readFile('pom.xml')
+   }
+ stage name: "build JenkinsAssignment and 1.0-SNAPSHOT" 
+ node {
+     sh "${mvnHome}/bin/mvn -Dmaven.test.failure.ignore clean package"
+    }
+ 
+ stage name: "Awaiting Approval for deploying JenkinsAssignment and 1.0-SNAPSHOT", timeout: 5 
+ 
+   //input 'Ready to go?'
+ 
+ stage name: "Deploying JenkinsAssignment and 1.0-SNAPSHOT"
+ node {
+    sh "sudo -s cp -r /Users/Shared/Jenkins/Home/workspace/grovy_example/target/JenkinsAssignment.war /usr/local/apache-tomcat-8.5.6/webapps/JenkinsAssignment.war"
+    }
+
+ stage name: "Executing tests"
+ node {
+    sh "curl http://localhost:9091/JenkinsAssignment/jenkinsapp"      
+}
